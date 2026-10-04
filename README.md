@@ -1,58 +1,124 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# SignWise ASL
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+SignWise ASL is a small web app for learning and practising American Sign Language (ASL). Learners can browse beginner lessons with written sign references and practice tips, use an optional camera preview while practising, take a short quiz, and save lesson and quiz progress to an account.
 
-## About Laravel
+The camera is a local preview for practice; the app does not automatically recognize or grade signs.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## What You Can Do
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- Browse a catalog of short lessons grouped by topic.
+- Read a sign reference and practice tip for each lesson.
+- Create an account or sign in to save progress.
+- Mark lessons as practised and review completion and quiz results on the dashboard.
+- Take a five-question quiz based on the lesson catalog.
+- Try the optional camera preview from the home page.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## Requirements
 
-## Learning Laravel
+- PHP 8.3 or newer with the SQLite PDO extension enabled.
+- Composer.
+- Node.js and npm.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Run Locally (Windows PowerShell)
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Run these commands from the project root, the folder containing `artisan` and `composer.json`.
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+1. Install PHP dependencies:
 
-## Agentic Development
+   ```powershell
+   composer install
+   ```
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+2. Install JavaScript dependencies:
 
-```bash
-composer require laravel/boost --dev
+   ```powershell
+   npm install
+   ```
 
-php artisan boost:install
+3. Create your local environment file and application key:
+
+   ```powershell
+   Copy-Item .env.example .env
+   php artisan key:generate
+   ```
+
+   If `.env` already exists, keep it and do not overwrite it with the example file.
+
+4. Create the SQLite database file if it does not already exist, then create the tables and load sample data:
+
+   ```powershell
+   if (-not (Test-Path database/database.sqlite)) { New-Item -ItemType File -Path database/database.sqlite | Out-Null }
+   php artisan migrate --seed
+   ```
+
+   The default configuration uses SQLite, so no separate database server is needed.
+
+5. Build the front-end assets:
+
+   ```powershell
+   npm run build
+   ```
+
+6. Start the app, queue worker, and front-end development server:
+
+   ```powershell
+   composer run dev
+   ```
+
+   Open [http://localhost:8000](http://localhost:8000). Leave the command running while using the app. Stop it with `Ctrl+C`.
+
+## Database
+
+SQLite is the default database. The local database is `database/database.sqlite`; it is created by the setup step above and should not be committed. Database connection settings are read from `.env`.
+
+The migrations create these main application tables:
+
+| Table | Purpose |
+| --- | --- |
+| `users` | Learner accounts and authentication details. |
+| `lessons` | Lesson titles, categories, difficulty, estimated duration, sign references, and practice tips. |
+| `user_progress` | Per-user lesson completion, quiz score, and last-practised time. Each user has at most one progress record per lesson. |
+
+Laravel also uses supporting tables for sessions, password resets, cache, and queued jobs in the default local configuration.
+
+To use MySQL instead, create a database first, set `DB_CONNECTION=mysql` and the appropriate `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, and `DB_PASSWORD` values in `.env`, then run:
+
+```powershell
+php artisan migrate --seed
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Make sure PHP has the MySQL PDO extension enabled when using MySQL.
 
-## Contributing
+### Sample Data and Demo Account
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+The seeders add 10 sample lessons and a demo learner with progress records. After running `php artisan migrate --seed`, you can sign in with:
 
-## Code of Conduct
+- Email: `learner@signwise.test`
+- Password: `password`
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+These credentials are for local development only. Do not use them in a deployed environment.
 
-## Security Vulnerabilities
+## Useful Commands
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```powershell
+# Apply new migrations
+php artisan migrate
 
-## License
+# Load or refresh the sample data
+php artisan db:seed
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# Run the test suite
+php artisan test
+
+# Rebuild front-end assets
+npm run build
+```
+
+## Main Pages
+
+- `/` — Home page and featured lessons.
+- `/how-it-works` — Learning overview.
+- `/lessons` — Lesson catalog.
+- `/lessons/{lesson}` — Lesson details.
+- `/register` and `/login` — Learner account access.
+- `/dashboard` and `/quiz` — Signed-in learner progress and quizzes.

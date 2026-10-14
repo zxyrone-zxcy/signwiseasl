@@ -9,7 +9,7 @@
                 <p class="eyebrow"><span></span> Learning that meets you where you are</p>
                 <h1>Learn sign language<br>with confidence.</h1>
                 <p class="hero-description">Build practical signing skills at your own pace. Practice hand gestures with a friendly camera-based learning experience designed to support every step.</p>
-                <div class="hero-actions"><a class="button button-primary button-arrow" href="{{ route('lessons.index') }}" aria-label="Explore lessons">&#8594;</a><a class="button button-outline" href="{{ route('lessons.index') }}">Explore lessons</a></div>
+                <div class="hero-actions"><a class="button button-primary button-arrow" href="#featured-lessons" aria-label="View featured lessons">&#8594;</a><a class="button button-outline" href="{{ route('lessons.index') }}">Explore lessons</a></div>
                 <p class="privacy-note"><span aria-hidden="true">&#9673;</span> Camera access stays in your browser.</p>
             </div>
             <div class="preview-shell" data-camera-panel>
@@ -32,7 +32,7 @@
             <article class="rhythm-card"><span class="step-number step-gold">03</span><h3>Keep your progress</h3><p>Save practice attempts, revisit lessons, and celebrate every sign you learn along the way.</p></article>
         </div>
     </div></section>
-    <section class="page-width section-block featured-block">
+    <section id="featured-lessons" class="page-width section-block featured-block">
         <p class="eyebrow"><span></span> Start with the essentials</p><h2>Featured beginner lessons</h2>
         <p class="section-intro">Choose a topic that feels useful today and build a foundation you can return to anytime.</p>
         <div class="lesson-grid featured-grid">

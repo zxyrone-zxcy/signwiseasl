@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
+use App\Notifications\ResetPasswordNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Password;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class PasswordResetLinkController extends Controller
@@ -26,20 +28,46 @@ class PasswordResetLinkController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
+        $validated = $request->validate([
             'email' => ['required', 'email'],
         ]);
 
-        // We will send the password reset link to this user. Once we have attempted
-        // to send the link, we will examine the response then see the message we
-        // need to show to the user. Finally, we'll send out a proper response.
-        $status = Password::sendResetLink(
-            $request->only('email')
-        );
+        $user = User::query()
+            ->where('email', $validated['email'])
+            ->whereNotNull('email_verified_at')
+            ->first();
 
-        return $status == Password::RESET_LINK_SENT
-                    ? back()->with('status', __($status))
-                    : back()->withInput($request->only('email'))
-                        ->withErrors(['email' => __($status)]);
+        if ($user !== null) {
+            $throttleSeconds = (int) config('auth.passwords.users.throttle', 60);
+
+            $token = DB::transaction(function () use ($user, $throttleSeconds): ?string {
+                $record = DB::table('password_reset_tokens')
+                    ->where('email', $user->email)
+                    ->lockForUpdate()
+                    ->first();
+
+                if ($record !== null && Carbon::parse($record->created_at)->gt(now()->subSeconds($throttleSeconds))) {
+                    return null;
+                }
+
+                $token = rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '=');
+
+                DB::table('password_reset_tokens')->updateOrInsert(
+                    ['email' => $user->email],
+                    [
+                        'token' => hash('sha256', $token),
+                        'created_at' => now(),
+                    ],
+                );
+
+                return $token;
+            });
+
+            if ($token !== null) {
+                $user->notify(new ResetPasswordNotification($token));
+            }
+        }
+
+        return back()->with('status', __('If an account exists for that email address, a password reset link has been sent.'));
     }
 }

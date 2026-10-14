@@ -8,9 +8,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/sass/app.scss', 'resources/js/app.js'])
 </head>
-<body>
+<body class="signwise-public-shell">
     <header class="site-header">
         <div class="header-inner page-width">
             <a class="brand" href="{{ route('home') }}" aria-label="SignWise home"><span class="brand-mark" aria-hidden="true">S</span><span>SignWise</span></a>

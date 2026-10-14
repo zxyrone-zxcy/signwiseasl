@@ -121,4 +121,8 @@ npm run build
 - `/lessons` — Lesson catalog.
 - `/lessons/{lesson}` — Lesson details.
 - `/register` and `/login` — Learner account access.
+<<<<<<< HEAD
 - `/dashboard` and `/quiz` — Signed-in learner progress and quizzes.
+=======
+- `/dashboard` and `/quiz` — Signed-in learner progress and quizzes.
+>>>>>>> 2ebf8df4e92e58ff8a50e15223132cd036f15136

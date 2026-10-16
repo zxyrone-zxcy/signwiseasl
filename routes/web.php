@@ -17,6 +17,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [ProgressController::class, 'index'])->name('dashboard');
     Route::get('/quiz', [ProgressController::class, 'quiz'])->name('quiz');
     Route::post('/quiz', [ProgressController::class, 'submitQuiz'])->name('quiz.submit');
+    Route::get('/quiz/results', [ProgressController::class, 'results'])->name('quiz.results');
     Route::post('/lessons/{lesson}/progress', [ProgressController::class, 'complete'])->name('lessons.progress.store');
     Route::resource('lessons', LessonController::class)->except(['index', 'show']);
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

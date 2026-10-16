@@ -174,10 +174,11 @@ h1, .section-block h2, .dashboard-section-heading h2 { font-family: 'Fraunces', 
 .camera-video.is-active { display: block; }
 .preview-label, .camera-corner { position: absolute; top: 14px; left: 14px; padding: 7px 10px; border-radius: 20px; color: var(--ink); background: #fff; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; box-shadow: 0 4px 12px #102b4320; }
 .camera-indicator { position: absolute; top: 20px; right: 16px; width: 15px; height: 15px; border: 4px solid white; border-radius: 50%; background: var(--teal); box-shadow: 0 2px 8px #102b4320; }
-.recognition-panel { position: absolute; right: 12px; bottom: 12px; left: 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 16px; border-radius: 11px; background: rgba(255,255,255,.96); }
+.recognition-panel { position: absolute; right: 12px; bottom: 12px; left: 12px; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 16px; border-radius: 11px; background: rgba(255,255,255,.96); color: #211d3f; }
 .micro-label { display: block; margin: 0 0 5px; color: #4d3794; font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
-.recognition-panel strong { display: block; font-family: 'Fraunces', Georgia, serif; font-size: 20px; }
-.camera-start { padding: 0; border: 0; color: var(--teal); background: transparent; font-size: 11px; font-weight: 700; cursor: pointer; }
+.recognition-panel strong { display: block; color: #211d3f; font-family: 'Fraunces', Georgia, serif; font-size: 20px; }
+.camera-start { padding: 0; border: 0; color: #087f72; background: transparent; font-size: 11px; font-weight: 700; cursor: pointer; }
+.camera-start:disabled { opacity: 1; cursor: wait; }
 .camera-message { min-height: 16px; margin: 8px 4px 0; color: var(--muted); font-size: 10px; }
 .rhythm-band { background: rgba(255,255,255,0.02); }
 .section-block { padding-block: 70px; }
@@ -361,14 +362,18 @@ body.signwise-public-shell .featured-block > .text-link { color: #f0eaff; }
 .field-error { color: #aa3b36; font-size: 10px; }
 .form-actions { display: flex; justify-content: flex-end; gap: 9px; padding-top: 7px; }
 .quiz-page { max-width: 850px; }
-.quiz-form { display: grid; gap: 18px; }
+.quiz-form { --ink: #28213a; --muted: #625876; --blue: #51358f; --teal: #087b72; --line: rgba(53, 36, 83, 0.2); display: grid; gap: 18px; }
 .quiz-question { min-width: 0; margin: 0; padding: 20px; border: 1px solid var(--line); border-radius: 11px; }
-.quiz-question legend { display: flex; align-items: flex-start; gap: 13px; width: 100%; padding: 0 0 16px; color: var(--ink); font-size: 12px; line-height: 1.6; }
+.quiz-question legend { display: flex; align-items: flex-start; gap: 13px; width: 100%; padding: 0 0 16px; color: var(--ink); font-size: 15px; line-height: 1.6; }
 .quiz-question legend .step-number { flex: 0 0 34px; }
 .quiz-options { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-.quiz-option { position: relative; display: flex; align-items: center; gap: 9px; min-height: 43px; padding: 8px 11px; border: 1px solid var(--line); border-radius: 8px; color: var(--muted); font-size: 11px; cursor: pointer; }
+.quiz-option { position: relative; display: flex; align-items: center; gap: 9px; min-height: 43px; padding: 8px 11px; border: 1px solid var(--line); border-radius: 8px; color: var(--muted); font-size: 14px; cursor: pointer; }
 .quiz-option:has(input:checked) { border-color: var(--teal); color: var(--teal); background: #f0faf7; }
 .quiz-option input { accent-color: var(--teal); }
+.quiz-result-panel { display: grid; justify-items: center; gap: 10px; padding: 34px 20px; border: 1px solid rgba(53, 36, 83, 0.16); border-radius: 14px; color: #28213a; background: #fff; text-align: center; }
+.quiz-result-score { margin: 0; color: #51358f; font-family: 'Fraunces', Georgia, serif; font-size: 56px; font-weight: 700; line-height: 1; }
+.quiz-result-count { margin: 0; color: #625876; font-size: 16px; }
+.quiz-result-actions { display: flex; justify-content: center; margin-top: 20px; }
 .site-auth { min-height: 100vh; background: radial-gradient(ellipse at 85% 20%, #e4f4f1, transparent 36%), var(--paper); }
 .auth-card { border-radius: 12px !important; }
 .auth-layout { min-height: 100vh; background: linear-gradient(180deg, #4030b4 0%, #4a38d3 100%); }

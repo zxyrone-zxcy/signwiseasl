@@ -29,15 +29,33 @@ document.querySelectorAll('[data-camera-panel]').forEach((panel) => {
 			return;
 		}
 
+		if (cameraStream) return;
+		if (startButton) startButton.disabled = true;
+		if (message) message.textContent = 'Waiting for camera permission...';
+
 		try {
-			cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
-			video.srcObject = cameraStream;
-			video.classList.add('is-active');
+			cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'user' } }, audio: false });
+			if (video) {
+				video.srcObject = cameraStream;
+				await video.play();
+				video.classList.add('is-active');
+			}
 			if (placeholder) placeholder.hidden = true;
 			if (stopButton) stopButton.hidden = false;
 			if (message) message.textContent = 'Live preview is on this device only. SignWise does not record video.';
-		} catch {
-			if (message) message.textContent = 'Camera access was not granted. You can continue with the written sign reference.';
+		} catch (error) {
+			cameraStream?.getTracks().forEach((track) => track.stop());
+			cameraStream = undefined;
+			const errors = {
+				NotAllowedError: 'Camera permission is blocked. Allow camera access for this site in your browser settings, then try again.',
+				NotFoundError: 'No camera was found. Connect a camera and try again.',
+				NotReadableError: 'The camera is busy or unavailable. Close other apps using it, then try again.',
+				OverconstrainedError: 'The camera could not use the requested settings. Try another camera.',
+				SecurityError: 'Camera access is blocked. Allow it for this site and try again.',
+			};
+			if (message) message.textContent = errors[error.name] ?? `Camera could not start (${error.name ?? 'unknown error'}). Check browser permissions and try again.`;
+		} finally {
+			if (startButton) startButton.disabled = false;
 		}
 	});
 

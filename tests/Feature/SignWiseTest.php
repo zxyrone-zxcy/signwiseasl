@@ -52,7 +52,14 @@ it('scores a vocabulary quiz and saves the result to learner progress', function
     $answerKey = session('quiz.answer_key');
 
     $this->post(route('quiz.submit'), ['answers' => $answerKey])
-        ->assertRedirect(route('dashboard'));
+        ->assertRedirect(route('quiz.results'));
+
+    $this->get(route('dashboard'))->assertOk();
+
+    $this->get(route('quiz.results'))
+        ->assertOk()
+        ->assertSee('100%')
+        ->assertSee('5 of 5 correct');
 
     $this->assertDatabaseHas('user_progress', [
         'user_id' => $user->id,

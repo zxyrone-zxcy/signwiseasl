@@ -41,6 +41,8 @@ class ProgressController extends Controller
 
     public function quiz(): View
     {
+        session()->forget('quiz_result');
+
         $questions = Lesson::query()->inRandomOrder()->limit(5)->get()->map(function (Lesson $lesson): array {
             return [
                 'lesson' => $lesson,
@@ -59,6 +61,17 @@ class ProgressController extends Controller
         )->all()]);
 
         return view('quiz', ['questions' => $questions]);
+    }
+
+    public function results(Request $request): View|RedirectResponse
+    {
+        $result = $request->session()->get('quiz_result');
+
+        if (! is_array($result)) {
+            return redirect()->route('quiz');
+        }
+
+        return view('quiz-results', ['result' => $result]);
     }
 
     public function submitQuiz(Request $request): RedirectResponse
@@ -88,6 +101,14 @@ class ProgressController extends Controller
             );
         }
 
-        return redirect()->route('dashboard')->with('status', "Quiz saved: {$correctCount} of ".count($answerKey).' correct.');
+        $totalCount = count($answerKey);
+
+        session()->put('quiz_result', [
+            'correct' => $correctCount,
+            'total' => $totalCount,
+            'percentage' => (int) round($correctCount / $totalCount * 100),
+        ]);
+
+        return redirect()->route('quiz.results');
     }
 }

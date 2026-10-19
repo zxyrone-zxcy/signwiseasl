@@ -57,7 +57,7 @@ class ProgressController extends Controller
         });
 
         session(['quiz.answer_key' => $questions->mapWithKeys(
-            fn (array $question): array => [$question['lesson']->id => $question['lesson']->id],
+            fn(array $question): array => [$question['lesson']->id => $question['lesson']->id],
         )->all()]);
 
         return view('quiz', ['questions' => $questions]);

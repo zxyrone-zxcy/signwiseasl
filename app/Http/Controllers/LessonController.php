@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\helpers\lessonsHelper\LessonHelpers;
 use App\Http\Requests\StoreLessonRequest;
 use App\Http\Requests\UpdateLessonRequest;
 use App\Models\Lesson;
@@ -10,6 +11,11 @@ use Illuminate\Http\RedirectResponse;
 
 class LessonController extends Controller
 {
+
+    private function lessonHelper($request)
+    {
+        return new LessonHelpers($request);
+    }
     /**
      * Display a listing of the resource.
      */
@@ -33,8 +39,10 @@ class LessonController extends Controller
      */
     public function store(StoreLessonRequest $request): RedirectResponse
     {
-        $lesson = Lesson::create($request->validated());
 
+        $lesson = $request->validated();
+        $lesson_helper = $this->lessonHelper($lesson);
+        $lesson_helper->UpdateOrCreate();
         return redirect()->route('lessons.show', $lesson)->with('status', 'Lesson added to the catalog.');
     }
 
@@ -62,7 +70,9 @@ class LessonController extends Controller
      */
     public function update(UpdateLessonRequest $request, Lesson $lesson): RedirectResponse
     {
-        $lesson->update($request->validated());
+        $validateLesson = $request->validated();
+        $lesson_helper = $this->lessonHelper($validateLesson);
+        $lesson_helper->UpdateOrCreate($lesson->id);
 
         return redirect()->route('lessons.show', $lesson)->with('status', 'Lesson changes saved.');
     }

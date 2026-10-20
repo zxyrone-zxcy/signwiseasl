@@ -7,10 +7,12 @@ use App\Http\Requests\StoreLessonRequest;
 use App\Http\Requests\UpdateLessonRequest;
 use App\Models\Lesson;
 use Illuminate\Contracts\View\View;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
 
 class LessonController extends Controller
 {
+    use AuthorizesRequests;
 
     private function lessonHelper($request)
     {

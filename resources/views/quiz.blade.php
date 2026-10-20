@@ -1,15 +1,42 @@
 @extends('layouts.signwise')
-
 @section('title', 'Practice quiz')
-
 @section('content')
-    <section class="page-width quiz-page"><a class="back-link" href="{{ route('dashboard') }}">&#8592; Your progress</a><div class="form-heading"><p class="eyebrow"><span></span> Quick review · {{ $questions->count() }} questions</p><h1>Practice what<br>you remember.</h1><p class="section-intro">Read each sign reference, make the gesture, then choose its meaning. Your result is saved to your progress.</p></div>
-        <form method="POST" action="{{ route('quiz.submit') }}" class="quiz-form">@csrf
-            @foreach ($questions as $question)
-                @php($lesson = $question['lesson'])
-                <fieldset class="quiz-question"><legend><span class="step-number step-blue">{{ str_pad((string) $loop->iteration, 2, '0', STR_PAD_LEFT) }}</span><span>{{ $lesson->sign_reference }}</span></legend><div class="quiz-options">@foreach ($question['choices'] as $choice)<label class="quiz-option"><input type="radio" name="answers[{{ $lesson->id }}]" value="{{ $choice->id }}" required><span>{{ $choice->title }}</span></label>@endforeach</div></fieldset>
-            @endforeach
-            <button class="button button-primary" type="submit">Submit quiz <span aria-hidden="true">&#8594;</span></button>
-        </form>
-    </section>
+<section class="page-width quiz-page" data-sign-quiz data-templates-url="{{ asset('sign-templates.json') }}" data-debug="{{ request()->boolean('debug') ? '1' : '0' }}">
+    <a class="back-link" href="{{ route('dashboard') }}">&#8592; Your progress</a>
+    <div class="form-heading">
+        <p class="eyebrow"><span></span> Quick review · {{ $questions->count() }} questions</p>
+        <h1>Show what<br>you remember.</h1>
+        <p class="section-intro">Flip each card, then sign the word in front of your camera. You get up to 3 retries per question. Video stays in your browser and is never recorded.</p>
+    </div>
+
+    <form method="POST" action="{{ route('quiz.submit') }}" class="quiz-form" data-quiz-form>
+        @csrf
+        @foreach ($questions as $question)
+            @php($lesson = $question['lesson'])
+            <div class="sign-card" data-card data-title="{{ $lesson->title }}" @if (! $loop->first) hidden @endif>
+                <div class="sign-card-inner">
+                    <div class="sign-card-face sign-card-front">
+                        <p class="sign-card-count">Question {{ $loop->iteration }} of {{ $questions->count() }}</p>
+                        <h2 class="sign-card-word">{{ $lesson->title }}</h2>
+                        <details class="sign-hint">
+                            <summary>Show hint</summary>
+                            <p>{{ $lesson->sign_reference }}</p>
+                        </details>
+                        <button class="button button-primary" type="button" data-flip>Flip &amp; start camera</button>
+                    </div>
+                    <div class="sign-card-face sign-card-back">
+                        <video class="sign-video" data-video autoplay playsinline muted aria-label="Your camera"></video>
+                        <p class="sign-status" data-status aria-live="polite"></p>
+                        <div class="sign-actions">
+                            <button class="button button-outline" type="button" data-retry hidden>Try again</button>
+                            <button class="button button-primary" type="button" data-next hidden>Next question</button>
+                        </div>
+                    </div>
+                </div>
+                <input type="hidden" name="results[{{ $lesson->id }}]" value="0" data-result>
+            </div>
+        @endforeach
+        <noscript><p>This quiz needs JavaScript and a camera.</p></noscript>
+    </form>
+</section>
 @endsection

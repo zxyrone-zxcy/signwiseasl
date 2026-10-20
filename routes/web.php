@@ -18,6 +18,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/quiz', [ProgressController::class, 'quiz'])->name('quiz');
     Route::post('/quiz', [ProgressController::class, 'submitQuiz'])->name('quiz.submit');
     Route::get('/quiz/results', [ProgressController::class, 'results'])->name('quiz.results');
+    Route::get('/quiz/record', function () {
+        abort_unless(app()->environment('local'), 404);
+
+        return view('quiz-record', ['lessons' => Lesson::query()->orderBy('id')->pluck('title')]);
+    })->name('quiz.record');
     Route::post('/lessons/{lesson}/progress', [ProgressController::class, 'complete'])->name('lessons.progress.store');
     Route::resource('lessons', LessonController::class)->except(['index', 'show']);
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

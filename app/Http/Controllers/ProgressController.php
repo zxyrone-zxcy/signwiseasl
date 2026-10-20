@@ -43,21 +43,13 @@ class ProgressController extends Controller
     {
         session()->forget('quiz_result');
 
-        $questions = Lesson::query()->inRandomOrder()->limit(5)->get()->map(function (Lesson $lesson): array {
-            return [
-                'lesson' => $lesson,
-                'choices' => Lesson::query()
-                    ->whereKeyNot($lesson->id)
-                    ->inRandomOrder()
-                    ->limit(3)
-                    ->get()
-                    ->push($lesson)
-                    ->shuffle(),
-            ];
-        });
+        // Camera quiz: each question is just a lesson. The learner signs it and the browser reports pass/fail.
+        $questions = Lesson::query()->inRandomOrder()->limit(5)->get()->map(
+            fn (Lesson $lesson): array => ['lesson' => $lesson],
+        );
 
         session(['quiz.answer_key' => $questions->mapWithKeys(
-            fn(array $question): array => [$question['lesson']->id => $question['lesson']->id],
+            fn (array $question): array => [$question['lesson']->id => $question['lesson']->id],
         )->all()]);
 
         return view('quiz', ['questions' => $questions]);
@@ -76,23 +68,22 @@ class ProgressController extends Controller
 
     public function submitQuiz(Request $request): RedirectResponse
     {
-        $answers = $request->validate([
-            'answers' => ['required', 'array'],
-            'answers.*' => ['required', 'integer', 'distinct'],
-        ])['answers'];
+        // results[lessonId] is "1" (passed) or "0" (failed or skipped), set by the camera quiz in the browser.
+        $results = $request->validate([
+            'results' => ['required', 'array'],
+            'results.*' => ['required', 'boolean'],
+        ])['results'];
+
         $answerKey = session()->pull('quiz.answer_key');
 
         if (! is_array($answerKey) || count($answerKey) === 0) {
-            throw ValidationException::withMessages(['answers' => 'Start a new practice quiz before submitting.']);
+            throw ValidationException::withMessages(['results' => 'Start a new practice quiz before submitting.']);
         }
 
-        $allowedIds = Lesson::query()->whereKey($answerKey)->pluck('id')->all();
         $correctCount = 0;
 
-        foreach ($answerKey as $lessonId => $correctId) {
-            $isCorrect = isset($answers[$lessonId])
-                && (int) $answers[$lessonId] === (int) $correctId
-                && in_array((int) $answers[$lessonId], $allowedIds, true);
+        foreach ($answerKey as $lessonId => $unused) {
+            $isCorrect = (bool) ($results[$lessonId] ?? false);
             $correctCount += (int) $isCorrect;
 
             UserProgress::query()->updateOrCreate(

@@ -62,3 +62,6 @@ document.querySelectorAll('[data-camera-panel]').forEach((panel) => {
 	stopButton?.addEventListener('click', stopCamera);
 	window.addEventListener('pagehide', stopCamera, { once: true });
 });
+
+if (document.querySelector('[data-sign-quiz]')) import('./sign/quiz.js');
+if (document.querySelector('[data-sign-recorder]')) import('./sign/recorder.js');

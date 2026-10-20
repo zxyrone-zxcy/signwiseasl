@@ -1,0 +1,268 @@
+/* Author CSS like display:flex would otherwise override the [hidden] attribute. */
+.sign-card [hidden],
+.sign-recorder [hidden] {
+  display: none !important;
+}
+
+.sign-card {
+  position: relative;
+  height: clamp(600px, 88vh, 780px);
+  max-width: 720px;
+  margin: 0 auto 2rem;
+  perspective: 1200px;
+}
+
+/* The .quiz-form is a CSS grid, so its card children shrink to near-zero width
+   because the faces are absolutely positioned (no intrinsic size). Force the card
+   to fill the track so it renders at its 640px max-width instead of a thin pill. */
+.quiz-form .sign-card {
+  width: 100%;
+  justify-self: stretch;
+}
+
+.sign-card[hidden] {
+  display: none;
+}
+
+.sign-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.6s ease;
+}
+
+.sign-card.is-flipped .sign-card-inner {
+  transform: rotateY(180deg);
+}
+
+.sign-card-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-radius: 1.25rem;
+  background: #fff;
+  box-shadow: 0 10px 30px rgba(20, 30, 50, 0.12);
+  text-align: center;
+  overflow: hidden;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.sign-card-back {
+  transform: rotateY(180deg);
+}
+
+/* The page shell sets `color: #fff` on the body, and the face has a white
+   background, so text would inherit white-on-white. Force an explicit dark ink
+   and a light tinted surface for the card faces and everything inside them. */
+.quiz-form .sign-card-face {
+  color: #1f2340;
+  background: #faf9ff;
+  border: 1px solid #e4e0f5;
+}
+
+.quiz-form .sign-card-face h1,
+.quiz-form .sign-card-face h2,
+.quiz-form .sign-card-face h3,
+.quiz-form .sign-card-face p,
+.quiz-form .sign-card-face summary,
+.quiz-form .sign-card-face strong,
+.quiz-form .sign-card-face label,
+.quiz-form .sign-card-face span {
+  color: inherit;
+}
+
+/* .button-outline is styled for the dark header/hero, which leaves it unreadable
+   on the light card. Give it dark text and a visible border on the card. */
+.quiz-form .sign-card-face .button-outline {
+  color: #1f2340;
+  border-color: #b6addb;
+  background: #fff;
+}
+
+.quiz-form .sign-card-face .button-outline:hover {
+  border-color: #8f83c4;
+  background: #f3f0ff;
+}
+
+.sign-card-count {
+  margin: 0;
+  font-size: 0.9rem;
+  opacity: 0.7;
+}
+
+.sign-card-word {
+  margin: 0;
+  font-size: clamp(2.5rem, 8vw, 4rem);
+  line-height: 1.1;
+}
+
+.sign-hint {
+  max-width: 28rem;
+  font-size: 0.95rem;
+}
+
+.sign-hint summary {
+  cursor: pointer;
+}
+
+.sign-video {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  max-height: 60vh;
+  border-radius: 0.9rem;
+  background: #111;
+  object-fit: contain;
+  transform: scaleX(-1); /* mirror, like a mirror */
+}
+
+.sign-status {
+  min-height: 1.5em;
+  margin: 0;
+  font-weight: 600;
+}
+
+.sign-status.is-pass {
+  color: #0f7b53;
+}
+
+.sign-status.is-fail {
+  color: #b3261e;
+}
+
+/* Keep the flipped (camera) side readable on the light face: the status text
+   and the dark video/buttons must not inherit the white page color. */
+.quiz-form .sign-card-back .sign-status {
+  color: #1f2340;
+}
+
+.quiz-form .sign-card-back .sign-status.is-pass {
+  color: #0f7b53;
+}
+
+.quiz-form .sign-card-back .sign-status.is-fail {
+  color: #b3261e;
+}
+
+.quiz-form .sign-card-back .sign-video {
+  border: 1px solid #e4e0f5;
+  background: #1f2340;
+}
+
+/* Let the camera and status shrink so the Try again / Next buttons always fit
+   inside the fixed-height card, and keep the video from overflowing on phones. */
+.quiz-form .sign-card-back .sign-video,
+.quiz-form .sign-card-back .sign-status {
+  flex: 0 1 auto;
+  min-height: 0;
+}
+
+.quiz-form .sign-card-back .sign-video {
+  max-height: min(60vh, 100%);
+}
+
+.quiz-form .sign-card-back .sign-actions {
+  flex: 0 0 auto;
+}
+
+.sign-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+/* recorder page */
+.recorder-grid {
+  display: grid;
+  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  align-items: start;
+}
+
+.recorder-grid select {
+  display: block;
+  width: 100%;
+  margin: 0.5rem 0 1rem;
+  padding: 0.6rem;
+}
+
+/* The recorder page sits on the theme's dark purple background, but the shared
+   select/button styles (and browser defaults) assume a light surface. Every rule
+   below is scoped under .sign-recorder so it only affects this dev tool. */
+
+/* Native <select>: the closed control and the open <option> list are styled
+   separately by the browser, so both need an explicit dark ink + white surface.
+   -webkit-text-fill-color is required because the shell sets color on <body>. */
+.sign-recorder .recorder-grid select,
+.sign-recorder .recorder-grid select option {
+  color: #1f2340 !important;
+  -webkit-text-fill-color: #1f2340 !important;
+  background-color: #fff !important;
+}
+
+.sign-recorder .recorder-grid select:focus-visible {
+  outline: 3px solid #7c5cff !important;
+  outline-offset: 2px;
+}
+
+/* .button-outline is themed for the dark header (faint text on a light pill),
+   which is invisible on the purple page. Give it a translucent surface. */
+.sign-recorder .sign-actions .button-outline {
+  color: #fff !important;
+  border-color: rgba(255, 255, 255, 0.55) !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+}
+
+.sign-recorder .sign-actions .button-outline:hover {
+  border-color: rgba(255, 255, 255, 0.8) !important;
+  background: rgba(255, 255, 255, 0.22) !important;
+}
+
+/* Nothing dims disabled buttons, so a disabled .button-primary looks enabled. */
+.sign-recorder .sign-actions .button:disabled {
+  opacity: 0.45 !important;
+  cursor: not-allowed !important;
+}
+
+.sign-recorder .sign-actions .button:disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Readable status text and camera frame on the dark background. */
+.sign-recorder .sign-status {
+  color: #fff !important;
+}
+
+.sign-recorder .sign-video {
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: #1f2340;
+}
+
+.sign-recorder .recorder-bar {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.sign-recorder .recorder-bar > span {
+  background: #2563eb;
+}
+
+/* The default list bullets + 40px indent look off on the dark panel. */
+.sign-recorder ul[data-counts] {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding-left: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sign-card-inner {
+    transition: none;
+  }
+}

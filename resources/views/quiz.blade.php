@@ -4,10 +4,22 @@
 <section class="page-width quiz-page" data-sign-quiz data-templates-url="{{ asset('sign-templates.json') }}" data-debug="{{ request()->boolean('debug') ? '1' : '0' }}">
     <a class="back-link" href="{{ route('dashboard') }}">&#8592; Your progress</a>
     <div class="form-heading">
-        <p class="eyebrow"><span></span> Quick review · {{ $questions->count() }} questions</p>
+        <p class="eyebrow"><span></span> Quick review{{ $questions->isNotEmpty() ? ' · '.$questions->count().' questions' : '' }}</p>
         <h1>Show what<br>you remember.</h1>
         <p class="section-intro">Flip each card, then sign the word in front of your camera. You get up to 3 retries per question. Video stays in your browser and is never recorded.</p>
     </div>
+
+    @if ($questions->isEmpty())
+        <div class="quiz-empty">
+            <p>No sign templates have been recorded yet, so the camera quiz has nothing to check against.</p>
+            <div class="form-actions">
+                <a class="button button-primary" href="{{ route('dashboard') }}">Go to your dashboard</a>
+                @if (app()->environment('local'))
+                    <a class="button button-outline" href="{{ route('quiz.record') }}">Record sign templates</a>
+                @endif
+            </div>
+        </div>
+    @else
 
     <form method="POST" action="{{ route('quiz.submit') }}" class="quiz-form" data-quiz-form>
         @csrf
@@ -38,5 +50,6 @@
         @endforeach
         <noscript><p>This quiz needs JavaScript and a camera.</p></noscript>
     </form>
+    @endif
 </section>
 @endsection

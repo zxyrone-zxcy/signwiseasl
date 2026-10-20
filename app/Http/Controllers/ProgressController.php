@@ -43,8 +43,20 @@ class ProgressController extends Controller
     {
         session()->forget('quiz_result');
 
+        $titles = $this->templatedLessonTitles();
+
+        $lessons = Lesson::query()
+            ->whereIn('title', $titles)
+            ->inRandomOrder()
+            ->limit(5)
+            ->get();
+
+        if ($lessons->isEmpty()) {
+            return view('quiz', ['questions' => collect()]);
+        }
+
         // Camera quiz: each question is just a lesson. The learner signs it and the browser reports pass/fail.
-        $questions = Lesson::query()->inRandomOrder()->limit(5)->get()->map(
+        $questions = $lessons->map(
             fn (Lesson $lesson): array => ['lesson' => $lesson],
         );
 
@@ -53,6 +65,31 @@ class ProgressController extends Controller
         )->all()]);
 
         return view('quiz', ['questions' => $questions]);
+    }
+
+    /**
+     * Titles that have a recorded sign template in public/sign-templates.json.
+     *
+     * @return array<int, string>
+     */
+    private function templatedLessonTitles(): array
+    {
+        $path = public_path('sign-templates.json');
+
+        if (! is_file($path)) {
+            return [];
+        }
+
+        $decoded = json_decode((string) file_get_contents($path), true);
+
+        if (! is_array($decoded)) {
+            return [];
+        }
+
+        return array_values(array_filter(
+            array_keys($decoded),
+            fn ($title): bool => is_string($title) && $title !== '',
+        ));
     }
 
     public function results(Request $request): View|RedirectResponse

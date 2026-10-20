@@ -68,7 +68,7 @@ it('scores a vocabulary quiz and saves the result to learner progress', function
 });
 
 it('creates, updates, and deletes a lesson through the authenticated catalog', function () {
-    $user = User::factory()->create();
+    $user = User::factory()->admin()->create();
     $lessonData = [
         'title' => 'New sign',
         'category' => 'Essentials',
@@ -95,4 +95,25 @@ it('creates, updates, and deletes a lesson through the authenticated catalog', f
 
     $this->delete(route('lessons.destroy', $lesson))->assertRedirect(route('lessons.index'));
     $this->assertDatabaseMissing('lessons', ['id' => $lesson->id]);
+});
+
+it('forbids non-admin learners from managing lessons', function () {
+    $user = User::factory()->create();
+    $lesson = Lesson::factory()->create();
+
+    $this->actingAs($user)->get(route('lessons.create'))->assertForbidden();
+    $this->actingAs($user)->get(route('lessons.edit', $lesson))->assertForbidden();
+    $this->actingAs($user)->post(route('lessons.store'), [
+        'title' => 'Not allowed',
+        'category' => 'Essentials',
+        'difficulty' => 'Beginner',
+        'duration_minutes' => 5,
+        'description' => 'Should not be created.',
+        'sign_reference' => 'No reference.',
+        'practice_tip' => 'No tip.',
+    ])->assertForbidden();
+    $this->actingAs($user)->patch(route('lessons.update', $lesson), ['title' => 'Nope'])->assertForbidden();
+    $this->actingAs($user)->delete(route('lessons.destroy', $lesson))->assertForbidden();
+
+    $this->assertDatabaseMissing('lessons', ['title' => 'Not allowed']);
 });

@@ -16,8 +16,12 @@ class UserProgressSeeder extends Seeder
     {
         $user = User::query()->firstOrCreate(
             ['email' => 'learner@signwise.test'],
-            ['name' => 'Demo Learner', 'password' => 'password'],
+            ['name' => 'Demo Learner', 'password' => 'password', 'is_admin' => true],
         );
+
+        if (! $user->is_admin) {
+            $user->update(['is_admin' => true]);
+        }
 
         foreach (Lesson::query()->orderBy('id')->get() as $index => $lesson) {
             UserProgress::query()->updateOrCreate(

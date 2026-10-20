@@ -91,10 +91,11 @@ Make sure PHP has the MySQL PDO extension enabled when using MySQL.
 
 ### Sample Data and Demo Account
 
-The seeders add 10 sample lessons and a demo learner with progress records. After running `php artisan migrate --seed`, you can sign in with:
+The seeders add 10 sample lessons and a demo learner with progress records. The demo account is also an admin, so it can manage lessons. After running `php artisan migrate --seed`, you can sign in with:
 
 - Email: `learner@signwise.test`
 - Password: `password`
+- Role: admin
 
 These credentials are for local development only. Do not use them in a deployed environment.
 

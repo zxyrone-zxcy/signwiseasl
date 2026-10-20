@@ -31,6 +31,8 @@ class LessonController extends Controller
      */
     public function create(): View
     {
+        $this->authorize('create', Lesson::class);
+
         return view('lessons.create');
     }
 
@@ -62,6 +64,8 @@ class LessonController extends Controller
      */
     public function edit(Lesson $lesson): View
     {
+        $this->authorize('update', $lesson);
+
         return view('lessons.edit', ['lesson' => $lesson]);
     }
 
@@ -82,6 +86,8 @@ class LessonController extends Controller
      */
     public function destroy(Lesson $lesson): RedirectResponse
     {
+        $this->authorize('delete', $lesson);
+
         $lesson->delete();
 
         return redirect()->route('lessons.index')->with('status', 'Lesson removed from the catalog.');

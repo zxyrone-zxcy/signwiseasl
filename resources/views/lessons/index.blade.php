@@ -4,7 +4,7 @@
 
 @section('content')
     <section class="page-width catalog-page">
-        <div class="catalog-heading"><div><p class="eyebrow"><span></span> Start with the essentials</p><h1>A sign for every<br>first conversation.</h1><p class="section-intro">Explore a focused set of beginner ASL signs, each with a clear reference and room to practice.</p></div>@auth<a class="button button-outline" href="{{ route('lessons.create') }}">Add a lesson <span aria-hidden="true">+</span></a>@endauth</div>
+        <div class="catalog-heading"><div><p class="eyebrow"><span></span> Start with the essentials</p><h1>A sign for every<br>first conversation.</h1><p class="section-intro">Explore a focused set of beginner ASL signs, each with a clear reference and room to practice.</p></div>@can('create', App\Models\Lesson::class)<a class="button button-outline" href="{{ route('lessons.create') }}">Add a lesson <span aria-hidden="true">+</span></a>@endcan</div>
         <div class="catalog-filter" aria-label="Lesson catalog summary"><span>Beginner collection</span><span>{{ $lessons->total() }} lessons</span></div>
         <div class="lesson-grid catalog-grid">
             @foreach ($lessons as $lesson)

@@ -11,7 +11,7 @@
                 <div class="tip-block"><span class="tip-mark">i</span><p><strong>Practice tip</strong><br>{{ $lesson->practice_tip }}</p></div>
                 @auth
                     <form method="POST" action="{{ route('lessons.progress.store', $lesson) }}">@csrf<button class="button button-primary" type="submit">{{ $progress?->is_completed ? 'Practice this sign again' : 'Mark practice complete' }} <span aria-hidden="true">&#8594;</span></button></form>
-                    <div class="lesson-admin-actions"><a href="{{ route('lessons.edit', $lesson) }}">Edit lesson</a><form method="POST" action="{{ route('lessons.destroy', $lesson) }}" onsubmit="return confirm('Remove this lesson from the catalog?')">@csrf @method('DELETE')<button type="submit">Delete</button></form></div>
+                    @can('update', $lesson)<div class="lesson-admin-actions"><a href="{{ route('lessons.edit', $lesson) }}">Edit lesson</a><form method="POST" action="{{ route('lessons.destroy', $lesson) }}" onsubmit="return confirm('Remove this lesson from the catalog?')">@csrf @method('DELETE')<button type="submit">Delete</button></form></div>@endcan
                 @else<a class="button button-primary" href="{{ route('login') }}">Log in to save practice <span aria-hidden="true">&#8594;</span></a>@endauth
             </div>
             <div class="practice-panel" data-camera-panel>

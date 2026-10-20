@@ -154,6 +154,19 @@ body.signwise-public-shell .hero-copy .button-arrow {
 	background: linear-gradient(180deg, #f5d683, #e8b84a);
 	color: #221d4c;
 }
+.signwise-public-shell .catalog-heading a.button.button-outline {
+	color: #fff;
+	border: 1px solid rgba(255,255,255,0.55);
+	background: rgba(255,255,255,0.12);
+}
+.signwise-public-shell .catalog-heading a.button.button-outline:hover {
+	border-color: rgba(255,255,255,0.8);
+	background: rgba(255,255,255,0.22);
+}
+.signwise-public-shell .catalog-heading a.button.button-outline:focus-visible {
+	outline: 2px solid #fff;
+	outline-offset: 2px;
+}
 .hero-copy { max-width: 500px; animation: rise-in .55s .04s both; }
 .eyebrow { display: flex; align-items: center; gap: 8px; margin: 0 0 16px; color: rgba(255,255,255,0.75); font-size: 10px; line-height: 1.4; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
 .eyebrow > span { display: none; }
@@ -311,8 +324,9 @@ body.signwise-public-shell .featured-block > .text-link { color: #f0eaff; }
 .practice-controls { display: flex; gap: 8px; padding-top: 14px; }
 .camera-stop { padding: 0 10px; border: 0; color: var(--muted); background: none; font-size: 11px; font-weight: 700; cursor: pointer; }
 .lesson-admin-actions { display: flex; align-items: center; gap: 8px; margin-top: 22px; padding-top: 13px; border-top: 1px solid var(--line); }
-.lesson-admin-actions a, .lesson-admin-actions button { display: inline-flex; min-height: 32px; align-items: center; padding: 0 10px; border: 1px solid rgba(255,255,255,0.18); border-radius: 7px; color: rgba(255,255,255,0.88); background: rgba(255,255,255,0.06); font-size: 10px; line-height: 1; text-decoration: none; cursor: pointer; }
-.lesson-admin-actions a:hover, .lesson-admin-actions button:hover { border-color: rgba(255,255,255,0.34); background: rgba(255,255,255,0.12); }
+.lesson-admin-actions a, .lesson-admin-actions button { display: inline-flex; min-height: 32px; align-items: center; padding: 0 10px; border: 1px solid rgba(255,255,255,0.55); border-radius: 7px; color: #fff; background: rgba(255,255,255,0.12); font-size: 10px; line-height: 1; text-decoration: none; cursor: pointer; }
+.lesson-admin-actions a:hover, .lesson-admin-actions button:hover { border-color: rgba(255,255,255,0.8); background: rgba(255,255,255,0.22); }
+.lesson-admin-actions a:focus-visible, .lesson-admin-actions button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .lesson-admin-actions form { display: flex; align-items: center; margin: 0; }
 .dashboard-heading { align-items: center; }
 .dashboard-heading h1 { margin-bottom: 10px; font-size: 44px; }

@@ -261,6 +261,77 @@
   padding-left: 0;
 }
 
+@media (max-width: 760px) {
+  /* Fixed viewport-height cards push the action buttons off-screen on phones
+     (the browser bar eats part of the viewport). Let the card size to its
+     content with a 70vh floor instead. */
+  .quiz-form .sign-card {
+    height: auto;
+    min-height: 70vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .quiz-form .sign-card[hidden] {
+    display: none;
+  }
+
+  /* The faces are absolutely positioned on desktop, so the card has no
+     intrinsic height. Stack them in one grid cell instead: the card then grows
+     with the taller face, and the rotateY + backface-visibility flip still
+     shows exactly one face at a time. */
+  .quiz-form .sign-card-inner {
+    flex: 1 1 auto;
+    height: auto;
+    display: grid;
+  }
+
+  .quiz-form .sign-card-face {
+    grid-area: 1 / 1;
+    position: relative;
+    inset: auto;
+  }
+
+  .quiz-form .sign-card .sign-video,
+  .quiz-form .sign-card-back .sign-video {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    max-height: none;
+    object-fit: contain;
+  }
+
+  .quiz-form .sign-card .sign-status {
+    width: 100%;
+    max-width: 100%;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    text-align: center;
+  }
+
+  /* The face is a column flex container with align-items: center, so the
+     actions row shrinks to its buttons. Stretch it full width first, then
+     stack the buttons. */
+  .quiz-form .sign-card .sign-actions {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .quiz-form .sign-card .sign-actions .button,
+  .quiz-form .sign-card-front .button {
+    width: 100%;
+    min-height: 44px;
+  }
+}
+
+@supports (height: 100dvh) {
+  @media (max-width: 760px) {
+    .quiz-form .sign-card {
+      min-height: 70dvh;
+    }
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .sign-card-inner {
     transition: none;

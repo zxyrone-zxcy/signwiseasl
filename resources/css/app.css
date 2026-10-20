@@ -545,11 +545,15 @@ body.signwise-public-shell .featured-block > .text-link { color: #f0eaff; }
 
 @media (max-width: 760px) {
 	.page-width { width: min(100% - 36px, 560px); }
+	/* Decorative rings must stay inside the viewport on narrow phones, or they
+	   create horizontal scrolling (the ring below reached 380px at a 360px width). */
+	body.signwise-public-shell::before { width: 300px; height: 300px; left: -140px; }
+	body.signwise-public-shell::after { width: 230px; height: 230px; left: 30px; }
 	.site-header { height: auto; min-height: 66px; }
 	.header-inner { grid-template-columns: 1fr auto; gap: 8px; padding-block: 12px; }
-	.main-nav { grid-column: 1 / -1; grid-row: 2; justify-content: center; gap: 4px; padding-block: 6px 2px; }
+	.main-nav { grid-column: 1 / -1; grid-row: 2; justify-content: center; flex-wrap: wrap; gap: 4px; padding-block: 6px 2px; }
 	body.signwise-public-shell .main-nav a { padding: 8px 10px; }
-	.header-actions { gap: 6px; }
+	.header-actions { flex-wrap: wrap; gap: 6px; }
 	.brand { font-size: 14px; }
 	.hero-band, .hero { min-height: 0; }
 	.hero { grid-template-columns: 1fr; gap: 28px; padding-block: 48px 35px; }

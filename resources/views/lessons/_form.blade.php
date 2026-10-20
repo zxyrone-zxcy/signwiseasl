@@ -13,7 +13,7 @@
         @enderror
     </div>
     <div class="form-field"><label for="difficulty">Level</label><select id="difficulty" name="difficulty" required>
-            <option value="Beginner" @selected(old('difficulty', $lesson?->difficulty) === 'Beginner')>Beginner</option>
+            <option value="Beginner" @selected(old('difficulty', $lesson?->difficulty ?? 'Beginner') === 'Beginner')>Beginner</option>
             <option value="Practice" @selected(old('difficulty', $lesson?->difficulty) === 'Practice')>Practice</option>
         </select>
         @error('difficulty')

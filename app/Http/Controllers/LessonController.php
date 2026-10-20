@@ -40,9 +40,9 @@ class LessonController extends Controller
     public function store(StoreLessonRequest $request): RedirectResponse
     {
 
-        $lesson = $request->validated();
-        $lesson_helper = $this->lessonHelper($lesson);
-        $lesson_helper->UpdateOrCreate();
+        $data = $request->validated();
+        $lesson_helper = $this->lessonHelper($data);
+        $lesson = $lesson_helper->UpdateOrCreate();
         return redirect()->route('lessons.show', $lesson)->with('status', 'Lesson added to the catalog.');
     }
 

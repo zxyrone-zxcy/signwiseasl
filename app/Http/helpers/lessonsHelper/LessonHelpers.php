@@ -18,24 +18,26 @@ class LessonHelpers
     public function UpdateOrCreate($id = null)
     {
 
-        Lesson::updateOrCreate(
-            ['id'  => $id],
+        $lesson = $id ? Lesson::findOrFail($id) : new Lesson();
 
-            [
-                'title' => $this->request['title'],
+        $lesson->fill([
+            'title' => $this->request['title'],
 
-                'category' => $this->request['category'],
+            'category' => $this->request['category'],
 
-                'difficulty' => $this->request['difficulty'],
+            'difficulty' => $this->request['difficulty'],
 
-                'duration_minutes' => $this->request['duration_minutes'],
+            'duration_minutes' => $this->request['duration_minutes'],
 
-                'description' => $this->request['description'],
+            'description' => $this->request['description'],
 
-                'sign_reference' => $this->request['sign_reference'],
+            'sign_reference' => $this->request['sign_reference'],
 
-                'practice_tip' => $this->request['practice_tip'],
-            ]
-        );
+            'practice_tip' => $this->request['practice_tip'],
+        ]);
+
+        $lesson->save();
+
+        return $lesson;
     }
 }

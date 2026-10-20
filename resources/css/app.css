@@ -354,8 +354,9 @@ body.signwise-public-shell .featured-block > .text-link { color: #f0eaff; }
 .form-heading h1 { margin-bottom: 9px; }
 .lesson-form, .quiz-form { padding: 25px; border: 1px solid var(--line); border-radius: 14px; background: white; }
 .form-field { display: grid; gap: 7px; margin-bottom: 17px; }
-.form-field label { color: var(--ink); font-size: 11px; font-weight: 700; }
-.form-field input, .form-field select, .form-field textarea { width: 100%; padding: 11px 12px; border: 1px solid #d6e1e2; border-radius: 8px; outline: none; color: var(--ink); background: white; font-size: 12px; }
+.form-field label { color: #374151; font-size: 11px; font-weight: 700; }
+.form-field input, .form-field select, .form-field textarea { width: 100%; padding: 11px 12px; border: 1px solid #d6e1e2; border-radius: 8px; outline: none; color: #1f2937; background: white; font-size: 12px; }
+.form-field input::placeholder, .form-field select::placeholder, .form-field textarea::placeholder { color: #9ca3af; opacity: 1; }
 .form-field textarea { resize: vertical; line-height: 1.55; }
 .form-field input:focus, .form-field select:focus, .form-field textarea:focus { border-color: #4b9a9a; box-shadow: 0 0 0 3px #07877f15; }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }

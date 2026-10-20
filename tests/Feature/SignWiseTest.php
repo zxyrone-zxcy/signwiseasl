@@ -79,7 +79,14 @@ it('creates, updates, and deletes a lesson through the authenticated catalog', f
         'practice_tip' => 'Keep your hands in frame.',
     ];
 
-    $this->actingAs($user)->post(route('lessons.store'), $lessonData)->assertRedirect();
+    $createdLesson = Lesson::query()->where('title', 'New sign')->first();
+    expect($createdLesson)->toBeNull();
+
+    $this->actingAs($user)
+        ->post(route('lessons.store'), $lessonData)
+        ->assertRedirect(route('lessons.show', Lesson::query()->where('title', 'New sign')->firstOrFail()))
+        ->assertSessionHas('status');
+
     $lesson = Lesson::query()->where('title', 'New sign')->firstOrFail();
 
     $this->patch(route('lessons.update', $lesson), [...$lessonData, 'title' => 'Updated sign'])

@@ -40,6 +40,7 @@ class LessonPolicy
     }
 
     /**
+     *
      * Determine whether the user can delete the model.
      */
     public function delete(User $user, Lesson $lesson): bool

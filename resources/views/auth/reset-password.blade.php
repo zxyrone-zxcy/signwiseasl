@@ -5,6 +5,9 @@
         <!-- Password Reset Token -->
         <input type="hidden" name="token" value="{{ $request->route('token') }}">
 
+        <!-- Email -->
+        <input type="hidden" name="email" value="{{ $request->email }}">
+
         <!-- Password -->
         <div>
             <x-input-label for="password" :value="__('Password')" />

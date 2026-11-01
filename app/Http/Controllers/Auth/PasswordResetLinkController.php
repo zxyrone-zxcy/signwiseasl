@@ -14,13 +14,15 @@ use Illuminate\View\View;
 
 class PasswordResetLinkController extends Controller
 {
-    
+
     /**
      * Display the password reset link request view.
      */
     public function create(): View
     {
-        return view('auth.forgot-password');
+        return view('auth.forgot-password', [
+            "status" => session("status")
+        ]);
     }
 
     /**
@@ -37,16 +39,11 @@ class PasswordResetLinkController extends Controller
         $status = Password::sendResetLink(
             $request->only("email")
         );
-        if($status == Password::RESET_LINK_SENT) {
-            return back()->with('status', _($status));
+        if ($status == Password::RESET_LINK_SENT) {
+            return back()->with('status', __($status));
         }
-         throw ValidationException::withMessages([
+        throw ValidationException::withMessages([
             'email' => [trans($status)],
-         ]);
-
-
-        
+        ]);
     }
-
-    
 }

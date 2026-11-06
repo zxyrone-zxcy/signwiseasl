@@ -1,0 +1,21 @@
+# Local-only files that must never be uploaded to a Vercel build.
+.env
+.env.*
+!.env.example
+node_modules
+vendor
+signwise
+.claude
+.agents
+.codestudio
+.commandcode
+.qwen
+.vercel
+tests
+bootstrap/cache/*.php
+storage/logs
+storage/framework/cache/data
+storage/framework/sessions
+storage/framework/views
+database/*.sqlite
+*.log

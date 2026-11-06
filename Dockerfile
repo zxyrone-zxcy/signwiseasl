@@ -26,9 +26,12 @@ COPY . .
 COPY --from=assets /build/public/build ./public/build
 COPY Caddyfile /etc/caddy/Caddyfile
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
-RUN composer dump-autoload --no-dev --optimize --no-interaction \
-    && php artisan package:discover --ansi \
+# Drop any compiled caches that came from a developer machine (they list dev-only packages such as Boost),
+# then regenerate everything against the production-only vendor directory.
+RUN rm -f bootstrap/cache/*.php \
     && mkdir -p storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache database \
+    && composer dump-autoload --no-dev --optimize --no-scripts --no-interaction \
+    && php artisan package:discover --ansi \
     && chmod -R 777 storage bootstrap/cache database
 
 # Sensible production defaults; override any of these in the Vercel project's environment variables.

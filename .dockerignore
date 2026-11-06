@@ -16,3 +16,4 @@ tests
 signwise
 .phpunit.result.cache
 *.log
+bootstrap/cache/*.php

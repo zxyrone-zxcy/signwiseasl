@@ -39,6 +39,7 @@
                     <div class="sign-card-face sign-card-back">
                         <video class="sign-video" data-video autoplay playsinline muted aria-label="Your camera"></video>
                         <p class="sign-status" data-status aria-live="polite"></p>
+                        <div class="accuracy-meter" data-accuracy hidden><div class="accuracy-meter-head"><span>Gesture accuracy</span><strong data-accuracy-value>0%</strong></div><div class="accuracy-meter-track" role="presentation"><i data-accuracy-bar></i></div></div>
                         <div class="sign-actions">
                             <button class="button button-outline" type="button" data-retry hidden>Try again</button>
                             <button class="button button-primary" type="button" data-next hidden>Next question</button>
@@ -46,6 +47,7 @@
                     </div>
                 </div>
                 <input type="hidden" name="results[{{ $lesson->id }}]" value="0" data-result>
+                <input type="hidden" name="accuracy[{{ $lesson->id }}]" value="" data-accuracy-input>
             </div>
         @endforeach
         <noscript><p>This quiz needs JavaScript and a camera.</p></noscript>

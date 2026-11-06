@@ -15,6 +15,7 @@ Route::get('/lessons', [LessonController::class, 'index'])->name('lessons.index'
 
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [ProgressController::class, 'index'])->name('dashboard');
+    Route::post('/lessons/{lesson}/accuracy', [ProgressController::class, 'recordAccuracy'])->name('lessons.accuracy.store');
     Route::get('/quiz', [ProgressController::class, 'quiz'])->name('quiz');
     Route::post('/quiz', [ProgressController::class, 'submitQuiz'])->name('quiz.submit');
     Route::get('/quiz/results', [ProgressController::class, 'results'])->name('quiz.results');

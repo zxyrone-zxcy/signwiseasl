@@ -18,6 +18,7 @@ class LessonController extends Controller
     {
         return new LessonHelpers($request);
     }
+
     /**
      * Display a listing of the resource.
      */
@@ -47,6 +48,7 @@ class LessonController extends Controller
         $data = $request->validated();
         $lesson_helper = $this->lessonHelper($data);
         $lesson = $lesson_helper->UpdateOrCreate();
+
         return redirect()->route('lessons.show', $lesson)->with('status', 'Lesson added to the catalog.');
     }
 
@@ -58,6 +60,8 @@ class LessonController extends Controller
         return view('lessons.show', [
             'lesson' => $lesson,
             'progress' => auth()->user()?->progress()->whereBelongsTo($lesson)->first(),
+            'previousLesson' => Lesson::query()->where('id', '<', $lesson->id)->orderByDesc('id')->first(),
+            'nextLesson' => Lesson::query()->where('id', '>', $lesson->id)->orderBy('id')->first(),
         ]);
     }
 

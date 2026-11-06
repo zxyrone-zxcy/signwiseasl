@@ -109,6 +109,18 @@ export function dtw(a, b, band = 5) {
   return prev[m] / (n + m);
 }
 
+/**
+ * Turn a DTW distance into a 0-100 accuracy for the learner. Display only: pass/fail
+ * still comes from THRESHOLD and MARGIN. A distance at the threshold maps to 60,
+ * a perfect match to 100, and twice the threshold or worse to 0.
+ */
+export function accuracyFromDistance(distance) {
+  if (!Number.isFinite(distance)) return 0;
+  const ratio = distance / THRESHOLD;
+  const score = ratio <= 1 ? 100 - ratio * 40 : 60 * (2 - ratio);
+  return Math.max(0, Math.min(100, Math.round(score)));
+}
+
 /** Turn recorded raw frames into a compact template (this is what gets saved to JSON). */
 export function buildTemplate(frames) {
   return resample(relativize(frames)).map((f) => f.map((v) => Math.round(v * 1000) / 1000));
@@ -145,7 +157,7 @@ export class SignMatcher {
     }
 
     const target = scores[title];
-    if (target === undefined) return { ready: true, matched: false, scores };
+    if (target === undefined) return { ready: true, matched: false, accuracy: 0, scores };
 
     let others = Infinity;
     for (const [name, value] of Object.entries(scores)) {
@@ -153,6 +165,8 @@ export class SignMatcher {
     }
 
     const matched = target <= THRESHOLD && target * MARGIN <= others;
-    return { ready: true, matched, target, others, scores };
+    // Never show a passing-looking score for an attempt that did not pass.
+    const accuracy = matched ? accuracyFromDistance(target) : Math.min(accuracyFromDistance(target), 59);
+    return { ready: true, matched, accuracy, target, others, scores };
   }
 }

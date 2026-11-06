@@ -1,6 +1,7 @@
 import './sign-quiz.css';
 import { createTracker, startCamera, cameraErrorMessage } from './tracker.js';
 import { SignMatcher, THRESHOLD, weightFrames } from './matcher.js';
+import { setAccuracy } from './accuracy-meter.js';
 
 const COUNTDOWN_SECONDS = 3;
 const ATTEMPT_MS = 6000; // how long the learner has to sign after "Sign now!"
@@ -73,8 +74,10 @@ function stopEverything() {
 }
 
 /** One attempt: countdown, then watch the camera until it matches or time runs out. Resolves true/false. */
-async function attemptSign(video, status, title) {
+async function attemptSign(video, status, title, meter) {
   env.matcher.reset();
+  setAccuracy(meter, null);
+  let bestAccuracy = 0;
 
   status.className = 'sign-status';
   for (let n = COUNTDOWN_SECONDS; n > 0; n--) {
@@ -100,14 +103,19 @@ async function attemptSign(video, status, title) {
         const result = env.matcher.evaluate(title);
         streak = result.matched ? streak + 1 : 0;
 
+        if (result.ready && result.accuracy > bestAccuracy) {
+          bestAccuracy = result.accuracy;
+          if (!debug) setAccuracy(meter, bestAccuracy);
+        }
+
         if (debug && result.ready) {
           const others = Number.isFinite(result.others) ? result.others.toFixed(2) : '–';
           status.textContent = `target ${result.target?.toFixed(2) ?? '–'} | best other ${others} | threshold ${THRESHOLD}`;
         }
-        if (streak >= CONSECUTIVE_MATCHES) return resolve(true);
+        if (streak >= CONSECUTIVE_MATCHES) return resolve({ passed: true, accuracy: bestAccuracy });
       }
 
-      if (now > deadline) return resolve(false);
+      if (now > deadline) return resolve({ passed: false, accuracy: bestAccuracy });
       requestAnimationFrame(tick);
     };
 
@@ -129,6 +137,9 @@ async function run() {
     const retryButton = card.querySelector('[data-retry]');
     const nextButton = card.querySelector('[data-next]');
     const result = card.querySelector('[data-result]');
+    const meter = card.querySelector('[data-accuracy]');
+    const accuracyInput = card.querySelector('[data-accuracy-input]');
+    let bestOverall = 0;
 
     await waitForClick(flipButton);
     card.classList.add('is-flipped');
@@ -141,7 +152,9 @@ async function run() {
       await video.play().catch(() => {});
 
       for (let attempt = 1; attempt <= MAX_ATTEMPTS && !passed; attempt++) {
-        passed = await attemptSign(video, status, title);
+        const attemptResult = await attemptSign(video, status, title, meter);
+        passed = attemptResult.passed;
+        bestOverall = Math.max(bestOverall, attemptResult.accuracy);
         if (!passed && attempt < MAX_ATTEMPTS) {
           const retriesLeft = MAX_ATTEMPTS - attempt;
           status.textContent = `Not quite. You have ${retriesLeft} retr${retriesLeft === 1 ? 'y' : 'ies'} left.`;
@@ -154,9 +167,11 @@ async function run() {
 
       status.textContent = passed ? 'Pass ✓' : 'Fail ✗';
       status.className = `sign-status ${passed ? 'is-pass' : 'is-fail'}`;
+      setAccuracy(meter, bestOverall);
     }
 
     result.value = passed ? '1' : '0';
+    if (accuracyInput && ready) accuracyInput.value = String(bestOverall);
     nextButton.textContent = !ready ? (isLast ? 'Finish quiz' : 'Skip question') : isLast ? 'See my results' : 'Next question';
     nextButton.hidden = false;
     await waitForClick(nextButton);

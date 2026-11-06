@@ -39,7 +39,7 @@
                         <p>{{ request()->routeIs('register') ? 'Sign up and start learning ASL today.' : 'Your next sign is only a little practice away.' }}</p>
                     </div>
                     <div class="auth-card">{{ $slot }}</div>
-                    <p class="auth-footnote">Already have an account? <a href="{{ route('login') }}">Log in</a></p>
+                    <p class="auth-footnote">@if (request()->routeIs('login'))New here? <a href="{{ route('register') }}">Create an account</a>@else Already have an account? <a href="{{ route('login') }}">Log in</a>@endif</p>
                 </main>
             </div>
         </section>

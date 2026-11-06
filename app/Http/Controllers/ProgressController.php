@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DailyActivity;
 use App\Models\Lesson;
 use App\Models\UserProgress;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -19,12 +21,35 @@ class ProgressController extends Controller
         $completedCount = $user->progress()->where('is_completed', true)->count();
         $lessonCount = $lessons->count();
 
+        $recentActivity = $user->dailyActivities()
+            ->where('activity_date', '>=', today()->subDays(6))
+            ->get()
+            ->keyBy(fn (DailyActivity $activity): string => $activity->activity_date->toDateString());
+
+        $week = collect(range(6, 0))->map(function (int $daysAgo) use ($recentActivity): array {
+            $date = today()->subDays($daysAgo);
+            $activity = $recentActivity->get($date->toDateString());
+
+            return [
+                'label' => $date->format('D'),
+                'isToday' => $daysAgo === 0,
+                'count' => $activity === null ? 0 : $activity->lessons_practiced + $activity->quizzes_taken,
+            ];
+        });
+
         return view('dashboard', [
             'lessons' => $lessons,
             'progress' => $progress,
             'completedCount' => $completedCount,
             'lessonCount' => $lessonCount,
             'completionRate' => $lessonCount === 0 ? 0 : (int) round($completedCount / $lessonCount * 100),
+            'today' => $recentActivity->get(today()->toDateString()),
+            'week' => $week,
+            'streak' => DailyActivity::streakFrom(
+                $user->dailyActivities()->orderByDesc('activity_date')->limit(400)->pluck('activity_date')
+                    ->map(fn ($date): string => $date->toDateString()),
+            ),
+            'averageAccuracy' => $user->progress()->whereNotNull('best_accuracy')->avg('best_accuracy'),
             'averageScore' => $user->progress()->whereNotNull('quiz_score')->avg('quiz_score'),
         ]);
     }
@@ -36,7 +61,29 @@ class ProgressController extends Controller
             ['is_completed' => true, 'last_practiced_at' => now()],
         );
 
+        DailyActivity::recordFor($request->user(), ['lessons_practiced' => 1]);
+
         return redirect()->route('lessons.show', $lesson)->with('status', 'Practice attempt saved to your progress.');
+    }
+
+    public function recordAccuracy(Request $request, Lesson $lesson): JsonResponse
+    {
+        $validated = $request->validate([
+            'accuracy' => ['required', 'integer', 'between:0,100'],
+        ]);
+
+        $progress = UserProgress::query()->firstOrNew([
+            'user_id' => $request->user()->id,
+            'lesson_id' => $lesson->id,
+        ]);
+        $progress->recordAccuracy($validated['accuracy']);
+        $progress->last_practiced_at = now();
+        $progress->save();
+
+        return response()->json([
+            'best_accuracy' => $progress->best_accuracy,
+            'last_accuracy' => $progress->last_accuracy,
+        ]);
     }
 
     public function quiz(): View
@@ -106,10 +153,14 @@ class ProgressController extends Controller
     public function submitQuiz(Request $request): RedirectResponse
     {
         // results[lessonId] is "1" (passed) or "0" (failed or skipped), set by the camera quiz in the browser.
-        $results = $request->validate([
+        $validated = $request->validate([
             'results' => ['required', 'array'],
             'results.*' => ['required', 'boolean'],
-        ])['results'];
+            'accuracy' => ['nullable', 'array'],
+            'accuracy.*' => ['nullable', 'integer', 'between:0,100'],
+        ]);
+        $accuracies = $validated['accuracy'] ?? [];
+        $results = $validated['results'];
 
         $answerKey = session()->pull('quiz.answer_key');
 
@@ -123,13 +174,26 @@ class ProgressController extends Controller
             $isCorrect = (bool) ($results[$lessonId] ?? false);
             $correctCount += (int) $isCorrect;
 
-            UserProgress::query()->updateOrCreate(
+            $progress = UserProgress::query()->firstOrNew(
                 ['user_id' => $request->user()->id, 'lesson_id' => $lessonId],
-                ['quiz_score' => $isCorrect ? 100 : 0, 'last_practiced_at' => now()],
             );
+            $progress->quiz_score = $isCorrect ? 100 : 0;
+            $progress->last_practiced_at = now();
+
+            if (isset($accuracies[$lessonId])) {
+                $progress->recordAccuracy((int) $accuracies[$lessonId]);
+            }
+
+            $progress->save();
         }
 
         $totalCount = count($answerKey);
+
+        DailyActivity::recordFor($request->user(), [
+            'quizzes_taken' => 1,
+            'quiz_correct' => $correctCount,
+            'quiz_total' => $totalCount,
+        ]);
 
         session()->put('quiz_result', [
             'correct' => $correctCount,

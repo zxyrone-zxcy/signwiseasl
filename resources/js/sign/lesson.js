@@ -1,6 +1,7 @@
 import './sign-quiz.css';
 import { createTracker, startCamera, cameraErrorMessage } from './tracker.js';
 import { SignMatcher, weightFrames } from './matcher.js';
+import { setAccuracy } from './accuracy-meter.js';
 
 const COUNTDOWN_SECONDS = 3;
 const ATTEMPT_MS = 6000; // how long the learner has to sign after "Sign now!"
@@ -15,7 +16,9 @@ const message = root.querySelector('[data-camera-message]');
 const startButton = root.querySelector('[data-camera-start]');
 const stopButton = root.querySelector('[data-camera-stop]');
 const retryButton = root.querySelector('[data-camera-retry]');
+const meter = root.querySelector('[data-accuracy]');
 const title = root.dataset.title;
+const accuracyUrl = root.dataset.accuracyUrl;
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -103,13 +106,33 @@ function cancelWait() {
   retryResolve?.();
 }
 
-/** One attempt: countdown, then watch the camera until it matches or time runs out. Resolves true/false. */
+/** Saves the best accuracy for this lesson when a learner is logged in. Failure never blocks practice. */
+async function saveAccuracy(accuracy) {
+  if (!accuracyUrl) return;
+  try {
+    await fetch(accuracyUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content ?? '',
+      },
+      body: JSON.stringify({ accuracy }),
+    });
+  } catch {
+    // Offline or logged out: the practice result is still shown.
+  }
+}
+
+/** One attempt: countdown, then watch the camera until it matches or time runs out. Resolves { passed, accuracy }. */
 async function attemptSign() {
   env.matcher.reset();
+  setAccuracy(meter, null);
+  let bestAccuracy = 0;
 
   status.className = 'sign-status practice-status';
   for (let n = COUNTDOWN_SECONDS; n > 0; n--) {
-    if (env.stop) return false;
+    if (env.stop) return { passed: false, accuracy: 0 };
     status.textContent = `Get ready… ${n}`;
     await sleep(1000);
   }
@@ -122,7 +145,7 @@ async function attemptSign() {
     let streak = 0;
 
     const tick = (now) => {
-      if (env.stop) return resolve(false);
+      if (env.stop) return resolve({ passed: false, accuracy: bestAccuracy });
 
       if (video.readyState >= 2 && video.currentTime !== lastVideoTime) {
         lastVideoTime = video.currentTime;
@@ -133,10 +156,14 @@ async function attemptSign() {
         lastCheck = now;
         const result = env.matcher.evaluate(title);
         streak = result.matched ? streak + 1 : 0;
-        if (streak >= CONSECUTIVE_MATCHES) return resolve(true);
+        if (result.ready && result.accuracy > bestAccuracy) {
+          bestAccuracy = result.accuracy;
+          setAccuracy(meter, bestAccuracy);
+        }
+        if (streak >= CONSECUTIVE_MATCHES) return resolve({ passed: true, accuracy: bestAccuracy });
       }
 
-      if (now > deadline) return resolve(false);
+      if (now > deadline) return resolve({ passed: false, accuracy: bestAccuracy });
       requestAnimationFrame(tick);
     };
 
@@ -153,7 +180,19 @@ function showCamera() {
   message.textContent = 'Watch the screen and sign when the countdown ends. Video stays on this device.';
 }
 
+/** After a passing attempt, highlight the next-lesson link so learners can keep going without going back. */
+function revealNextLesson() {
+  const next = document.querySelector('[data-next-lesson]');
+  if (!next) return;
+  next.classList.add('is-ready');
+  const label = next.querySelector('[data-next-label]');
+  if (label?.dataset.readyText) label.textContent = label.dataset.readyText;
+  next.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
 function resetView() {
+  startButton.hidden = false;
+  setAccuracy(meter, null);
   video.classList.remove('is-active');
   placeholder.hidden = false;
   stopButton.hidden = true;
@@ -167,6 +206,7 @@ async function runPractice() {
 
   env.running = true;
   env.stop = false;
+  startButton.hidden = false;
   env.failed = false;
   startButton.disabled = true;
   retryButton.hidden = true;
@@ -197,9 +237,12 @@ async function runPractice() {
   showCamera();
 
   let passed = false;
+  let bestOverall = 0;
   for (let attempt = 1; attempt <= MAX_ATTEMPTS && !passed; attempt++) {
     if (env.stop) break;
-    passed = await attemptSign();
+    const attemptResult = await attemptSign();
+    passed = attemptResult.passed;
+    bestOverall = Math.max(bestOverall, attemptResult.accuracy);
     if (!passed && attempt < MAX_ATTEMPTS && !env.stop) {
       const retriesLeft = MAX_ATTEMPTS - attempt;
       setStatus(`Not quite. You have ${retriesLeft} retr${retriesLeft === 1 ? 'y' : 'ies'} left.`, 'is-fail');
@@ -218,13 +261,21 @@ async function runPractice() {
   }
 
   setStatus(passed ? 'Pass ✓' : 'Fail ✗', passed ? 'is-pass' : 'is-fail');
+  setAccuracy(meter, bestOverall);
+  if (bestOverall > 0) saveAccuracy(bestOverall);
+  if (passed) revealNextLesson();
   message.textContent = passed
     ? 'Nice work. Keep practicing to build muscle memory.'
     : 'Not quite this time. Try again whenever you are ready.';
-  startButton.textContent = 'Practice again';
+  // One restart control: swap the start button for "Try again" so there is never a duplicate "Practice again".
+  startButton.hidden = true;
+  retryButton.hidden = false;
 }
 
 startButton.addEventListener('click', runPractice);
+retryButton.addEventListener('click', () => {
+  if (!env.running) runPractice();
+});
 
 stopButton.addEventListener('click', () => {
   env.stop = true;
@@ -236,3 +287,6 @@ stopButton.addEventListener('click', () => {
 });
 
 window.addEventListener('pagehide', stopEverything);
+
+// Just marked complete (flash message + finished lesson): bring the next lesson into view.
+if (document.querySelector('.flash-message') && document.querySelector('[data-next-lesson].is-ready')) revealNextLesson();

@@ -117,3 +117,87 @@ it('forbids non-admin learners from managing lessons', function () {
 
     $this->assertDatabaseMissing('lessons', ['title' => 'Not allowed']);
 });
+
+it('logs each day of practice and builds a streak from consecutive days', function () {
+    $user = User::factory()->create();
+    $lesson = Lesson::factory()->create();
+
+    $this->actingAs($user)->post(route('lessons.progress.store', $lesson));
+    $this->post(route('lessons.progress.store', $lesson));
+
+    $this->assertDatabaseHas('daily_activities', [
+        'user_id' => $user->id,
+        'activity_date' => today()->toDateString(),
+        'lessons_practiced' => 2,
+    ]);
+
+    $user->dailyActivities()->create(['activity_date' => today()->subDay()->toDateString()]);
+    $user->dailyActivities()->create(['activity_date' => today()->subDays(3)->toDateString()]);
+
+    $this->get(route('dashboard'))->assertOk()->assertSee('2 days');
+});
+
+it('keeps yesterday’s streak alive until today ends', function () {
+    $user = User::factory()->create();
+    $user->dailyActivities()->create(['activity_date' => today()->subDay()->toDateString()]);
+
+    $this->actingAs($user)->get(route('dashboard'))->assertOk()->assertSee('1 day')->assertSee('No practice yet today');
+});
+
+it('saves gesture accuracy per lesson and keeps the personal best', function () {
+    $user = User::factory()->create();
+    $lesson = Lesson::factory()->create();
+
+    $this->actingAs($user)->postJson(route('lessons.accuracy.store', $lesson), ['accuracy' => 82])
+        ->assertOk()->assertJson(['best_accuracy' => 82, 'last_accuracy' => 82]);
+    $this->postJson(route('lessons.accuracy.store', $lesson), ['accuracy' => 55])
+        ->assertOk()->assertJson(['best_accuracy' => 82, 'last_accuracy' => 55]);
+
+    $this->postJson(route('lessons.accuracy.store', $lesson), ['accuracy' => 101])->assertUnprocessable();
+
+    $this->get(route('dashboard'))->assertOk()->assertSee('82%');
+});
+
+it('requires a learner account to save gesture accuracy', function () {
+    $lesson = Lesson::factory()->create();
+
+    $this->postJson(route('lessons.accuracy.store', $lesson), ['accuracy' => 70])->assertUnauthorized();
+});
+
+it('stores per-question accuracy submitted with the camera quiz', function () {
+    $user = User::factory()->create();
+    $lesson = Lesson::factory()->create();
+
+    $this->actingAs($user)->withSession(['quiz.answer_key' => [$lesson->id => $lesson->id]])
+        ->post(route('quiz.submit'), ['results' => [$lesson->id => 1], 'accuracy' => [$lesson->id => 91]])
+        ->assertRedirect(route('quiz.results'));
+
+    $this->assertDatabaseHas('user_progress', ['user_id' => $user->id, 'lesson_id' => $lesson->id, 'quiz_score' => 100, 'best_accuracy' => 91]);
+});
+
+it('links each lesson to its previous and next lesson and highlights next once finished', function () {
+    $user = User::factory()->create();
+    [$first, $second, $third] = Lesson::factory()->count(3)->create()->all();
+
+    $this->actingAs($user)->get(route('lessons.show', $second))
+        ->assertOk()
+        ->assertSee(route('lessons.show', $first), false)
+        ->assertSee(route('lessons.show', $third), false)
+        ->assertSee('Up next</small>', false)
+        ->assertDontSee('Nice work! Continue with</small>', false);
+
+    $this->post(route('lessons.progress.store', $second));
+
+    $this->get(route('lessons.show', $second))->assertSee('Nice work! Continue with</small>', false);
+    $this->get(route('lessons.show', $third))->assertSee('Last lesson</small>', false);
+});
+
+it('shows an animated visual demo alongside the written sign reference', function () {
+    $lesson = Lesson::factory()->create();
+
+    $this->get(route('lessons.show', $lesson))
+        ->assertOk()
+        ->assertSee('data-sign-demo', false)
+        ->assertSee('Watch the sign')
+        ->assertSee($lesson->sign_reference);
+});

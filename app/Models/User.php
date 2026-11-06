@@ -36,4 +36,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(UserProgress::class);
     }
+
+    public function dailyActivities(): HasMany
+    {
+        return $this->hasMany(DailyActivity::class);
+    }
 }

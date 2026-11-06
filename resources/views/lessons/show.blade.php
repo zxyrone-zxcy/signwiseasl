@@ -14,10 +14,11 @@
                     @can('update', $lesson)<div class="lesson-admin-actions"><a href="{{ route('lessons.edit', $lesson) }}">Edit lesson</a><form method="POST" action="{{ route('lessons.destroy', $lesson) }}" onsubmit="return confirm('Remove this lesson from the catalog?')">@csrf @method('DELETE')<button type="submit">Delete</button></form></div>@endcan
                 @else<a class="button button-primary" href="{{ route('login') }}">Log in to save practice <span aria-hidden="true">&#8594;</span></a>@endauth
             </div>
-            <div class="practice-panel" data-camera-panel>
+            <div class="practice-panel" data-sign-lesson data-title="{{ $lesson->title }}" data-templates-url="{{ asset('sign-templates.json') }}">
                 <div class="practice-head"><div><span class="micro-label">Guided practice</span><strong>Take your time</strong></div><span class="practice-live"><i></i> Camera optional</span></div>
                 <div class="practice-screen"><div class="practice-placeholder" data-camera-placeholder><span class="practice-hand" aria-hidden="true">{{ ['Hello' => 'Hi', 'Thank you' => 'Thanks', 'Please' => 'Please', 'Sorry' => 'Sorry', 'Yes' => 'Yes', 'No' => 'No', 'Help' => 'Help', 'Good' => 'Good', 'More' => 'More', 'Love' => 'Love'][$lesson->title] ?? 'Sign' }}</span><span>Place your hand in the frame</span></div><video class="camera-video" data-camera-video autoplay playsinline muted aria-label="Live camera preview"></video><span class="camera-corner">Practice view</span></div>
-                <div class="practice-controls"><button class="button button-outline" type="button" data-camera-start>Turn on camera</button><button class="camera-stop" type="button" data-camera-stop hidden>Turn off</button></div>
+                <p class="sign-status practice-status" data-status aria-live="polite"></p>
+                <div class="practice-controls"><button class="button button-outline" type="button" data-camera-start>Start practice</button><button class="button button-outline" type="button" data-camera-retry hidden>Try again</button><button class="camera-stop" type="button" data-camera-stop hidden>Turn off</button></div>
                 <p class="camera-message" data-camera-message aria-live="polite">Your camera feed stays on this device. SignWise does not record video.</p>
             </div>
         </div>

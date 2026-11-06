@@ -64,4 +64,5 @@ document.querySelectorAll('[data-camera-panel]').forEach((panel) => {
 });
 
 if (document.querySelector('[data-sign-quiz]')) import('./sign/quiz.js');
+if (document.querySelector('[data-sign-lesson]')) import('./sign/lesson.js');
 if (document.querySelector('[data-sign-recorder]')) import('./sign/recorder.js');

@@ -9,3 +9,7 @@
 /.github export-ignore
 CHANGELOG.md export-ignore
 .styleci.yml export-ignore
+
+docker/start.sh text eol=lf
+Dockerfile text eol=lf
+Caddyfile text eol=lf

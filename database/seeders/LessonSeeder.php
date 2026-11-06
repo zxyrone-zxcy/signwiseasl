@@ -25,13 +25,13 @@ class LessonSeeder extends Seeder
             ['title' => 'Love', 'category' => 'People', 'description' => 'Practice a familiar sign for affection.', 'sign_reference' => 'Cross both arms over your chest with your hands in fists, as if giving yourself a gentle hug.', 'practice_tip' => 'Keep your shoulders relaxed as you cross your arms.'],
         ];
 
-        foreach ($lessons as $lesson) {
+        foreach ($lessons as $index => $lesson) {
             Lesson::query()->updateOrCreate(
                 ['title' => $lesson['title']],
                 [
                     ...$lesson,
-                    'difficulty' => fake()->randomElement(['Beginner', 'Practice']),
-                    'duration_minutes' => fake()->numberBetween(3, 10),
+                    'difficulty' => $index % 2 === 0 ? 'Beginner' : 'Practice',
+                    'duration_minutes' => 3 + (($index * 3) % 8),
                 ],
             );
         }

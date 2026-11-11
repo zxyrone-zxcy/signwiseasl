@@ -19,6 +19,10 @@ class UserProgressSeeder extends Seeder
             ['name' => 'Demo Learner', 'password' => 'password', 'is_admin' => true],
         );
 
+        if (! $user->hasVerifiedEmail()) {
+            $user->markEmailAsVerified();
+        }
+
         if (! $user->is_admin) {
             $user->update(['is_admin' => true]);
         }

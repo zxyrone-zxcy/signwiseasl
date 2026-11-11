@@ -201,3 +201,18 @@ it('shows an animated visual demo alongside the written sign reference', functio
         ->assertSee('Watch the sign')
         ->assertSee($lesson->sign_reference);
 });
+
+it('keeps learner features locked until the email address is verified', function () {
+    $user = User::factory()->unverified()->create();
+
+    foreach (['dashboard', 'quiz', 'quiz.results'] as $name) {
+        $this->actingAs($user)->get(route($name))->assertRedirect(route('verification.notice'));
+    }
+
+    $this->actingAs($user)->get(route('profile.edit'))->assertOk();
+    $this->get(route('lessons.index'))->assertOk();
+
+    $user->markEmailAsVerified();
+
+    $this->actingAs($user->fresh())->get(route('dashboard'))->assertOk();
+});

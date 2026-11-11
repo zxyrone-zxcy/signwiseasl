@@ -13,7 +13,8 @@ Route::get('/', function () {
 Route::view('/how-it-works', 'how-it-works')->name('how-it-works');
 Route::get('/lessons', [LessonController::class, 'index'])->name('lessons.index');
 
-Route::middleware('auth')->group(function () {
+// Learning features need a verified email address; the profile page stays open so a wrong address can be fixed.
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/dashboard', [ProgressController::class, 'index'])->name('dashboard');
     Route::post('/lessons/{lesson}/accuracy', [ProgressController::class, 'recordAccuracy'])->name('lessons.accuracy.store');
     Route::get('/quiz', [ProgressController::class, 'quiz'])->name('quiz');
@@ -26,6 +27,9 @@ Route::middleware('auth')->group(function () {
     })->name('quiz.record');
     Route::post('/lessons/{lesson}/progress', [ProgressController::class, 'complete'])->name('lessons.progress.store');
     Route::resource('lessons', LessonController::class)->except(['index', 'show']);
+});
+
+Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

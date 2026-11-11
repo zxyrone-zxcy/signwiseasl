@@ -9,6 +9,12 @@
         </div>
     @endif
 
+    @if (session('status') == 'verification-link-failed')
+        <div class="mb-4 font-medium text-sm text-red-600">
+            {{ __('We could not send the verification email right now. Please try Resend again in a moment.') }}
+        </div>
+    @endif
+
     <div class="mt-4 flex items-center justify-between">
         <form method="POST" action="{{ route('verification.send') }}">
             @csrf

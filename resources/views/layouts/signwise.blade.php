@@ -30,7 +30,22 @@
             </div>
         </div>
     </header>
-    @if (session('status'))<div class="page-width flash-message" role="status">{{ session('status') }}</div>@endif
+    @if (request()->boolean('verified'))<div class="page-width flash-message" role="status">Your email address is verified. Thank you!</div>@endif
+    @if (session('status') === 'verification-link-sent')
+        <div class="page-width flash-message" role="status">A new verification link is on its way to your inbox.</div>
+    @elseif (session('status') === 'verification-link-failed')
+        <div class="page-width flash-message is-error" role="alert">We could not send the verification email right now. Please try Resend again in a moment.</div>
+    @elseif (session('status'))
+        <div class="page-width flash-message" role="status">{{ session('status') }}</div>
+    @endif
+    @auth
+        @unless (auth()->user()->hasVerifiedEmail())
+            <div class="page-width verify-banner" role="status">
+                <span>Please verify your email address. We sent a link to <strong>{{ auth()->user()->email }}</strong>.</span>
+                <form method="POST" action="{{ route('verification.send') }}">@csrf<button class="button button-small button-outline" type="submit">Resend email</button></form>
+            </div>
+        @endunless
+    @endauth
     <main>@yield('content')</main>
     <footer class="site-footer page-width">
         <div class="footer-top">

@@ -524,4 +524,13 @@ body:has(.lesson-detail-page)::after { display: none; }
 .verify-banner { position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 14px; padding: 12px 16px; border: 1px solid rgba(246,212,129,.5); border-radius: 12px; background: rgba(246,212,129,.14); color: #fff; font-size: 13.5px; line-height: 1.5; box-shadow: var(--shadow-sm); }
 .verify-banner strong { color: #f6d481; }
 .verify-banner form { margin: 0; flex: none; }
+html body .verify-banner .button { background: #f6d481; border: 1px solid #f6d481; color: #1d1650; font-weight: 700; opacity: 1; text-shadow: none; box-shadow: 0 6px 16px rgba(0,0,0,.25); }
+html body .verify-banner .button:hover, html body .verify-banner .button:focus-visible { background: #fff; border-color: #fff; color: #1d1650; transform: translateY(-1px); }
 @media (max-width: 760px) { .verify-banner { flex-direction: column; align-items: flex-start; } }
+
+/* ---------- Loading skeletons ---------- */
+@keyframes sw-shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+.sign-demo:not(.is-ready):not(.is-empty) .sign-demo-stage { background: linear-gradient(100deg, #231a5c 30%, #3b2a7a 50%, #231a5c 70%) 0 0 / 200% 100%; animation: sw-shimmer 1.4s linear infinite; }
+.sign-demo:not(.is-ready):not(.is-empty) .sign-demo-controls { opacity: .45; pointer-events: none; }
+.practice-panel.is-loading .practice-screen { background: linear-gradient(100deg, rgba(255,255,255,.04) 30%, rgba(255,255,255,.12) 50%, rgba(255,255,255,.04) 70%) 0 0 / 200% 100%; animation: sw-shimmer 1.4s linear infinite; }
+@media (prefers-reduced-motion: reduce) { .sign-demo-stage, .practice-panel.is-loading .practice-screen { animation: none !important; } }

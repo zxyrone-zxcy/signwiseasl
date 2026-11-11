@@ -1,3 +1,4 @@
+import { fetchTemplates } from './templates.js';
 import './sign-quiz.css';
 import { createTracker, startCamera, cameraErrorMessage } from './tracker.js';
 import { SignMatcher, weightFrames } from './matcher.js';
@@ -27,9 +28,8 @@ let retryResolve = null;
 
 async function loadTemplates(url) {
   try {
-    const res = await fetch(url, { cache: 'no-store' });
-    if (!res.ok) return null;
-    const raw = await res.json();
+    const raw = await fetchTemplates(url);
+    if (!raw) return null;
     const out = {};
     for (const [name, list] of Object.entries(raw)) out[name] = list.map(weightFrames);
     return Object.keys(out).length ? out : null;
@@ -55,10 +55,12 @@ async function ensureReady() {
 
   if (!env.tracker) {
     status.textContent = 'Loading hand tracking…';
+    root.classList.add('is-loading');
     try {
       env.tracker = await createTracker();
     } catch (error) {
       console.error(error);
+      root.classList.remove('is-loading');
       env.failed = true;
       status.textContent = 'Hand tracking could not load. Check that the MediaPipe files are in public/mediapipe.';
       return false;
@@ -67,6 +69,7 @@ async function ensureReady() {
 
   if (!env.matcher) {
     const templates = await loadTemplates(root.dataset.templatesUrl);
+    root.classList.remove('is-loading');
     if (!templates) {
       env.failed = true;
       status.textContent = 'No sign templates found yet. Record them first at /quiz/record.';

@@ -1,3 +1,4 @@
+import { fetchTemplates } from './templates.js';
 import './sign-quiz.css';
 import { createTracker, startCamera, cameraErrorMessage } from './tracker.js';
 import { SignMatcher, THRESHOLD, weightFrames } from './matcher.js';
@@ -20,9 +21,8 @@ const env = { stream: null, tracker: null, matcher: null, failed: false };
 
 async function loadTemplates(url) {
   try {
-    const res = await fetch(url, { cache: 'no-store' });
-    if (!res.ok) return null;
-    const raw = await res.json();
+    const raw = await fetchTemplates(url);
+    if (!raw) return null;
     const out = {};
     for (const [title, list] of Object.entries(raw)) out[title] = list.map(weightFrames);
     return Object.keys(out).length ? out : null;

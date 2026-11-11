@@ -1,3 +1,4 @@
+import { fetchTemplates } from './templates.js';
 // "Watch the sign": replays the recorded hand motion for a lesson as an animated
 // hand diagram, so learners can see the sign instead of only reading about it.
 // Read-only use of public/sign-templates.json; nothing here changes matching or recording.
@@ -283,8 +284,8 @@ function loop(now) {
 async function init() {
   let takes = null;
   try {
-    const res = await fetch(root.dataset.templatesUrl, { cache: 'force-cache' });
-    if (res.ok) takes = (await res.json())[title];
+    const all = await fetchTemplates(root.dataset.templatesUrl);
+    takes = all?.[title];
   } catch {
     // fall through to the empty state
   }

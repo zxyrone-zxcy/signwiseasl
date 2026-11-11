@@ -75,18 +75,33 @@ if (document.querySelector('[data-sign-recorder]')) import('./sign/recorder.js')
 	// Header gains depth once the page scrolls.
 	const header = document.querySelector('.site-header');
 	if (header) {
-		const onScroll = () => header.classList.toggle('is-scrolled', window.scrollY > 8);
+		let scrollQueued = false;
+		const onScroll = () => {
+			if (scrollQueued) return;
+			scrollQueued = true;
+			requestAnimationFrame(() => {
+				scrollQueued = false;
+				header.classList.toggle('is-scrolled', window.scrollY > 8);
+			});
+		};
 		onScroll();
 		window.addEventListener('scroll', onScroll, { passive: true });
 	}
 
 	// Soft cursor-follow glow on cards.
 	document.querySelectorAll('.lesson-card, .rhythm-card').forEach((card) => {
+		let glowQueued = false;
 		card.addEventListener('pointermove', (event) => {
-			const rect = card.getBoundingClientRect();
-			card.style.setProperty('--mx', `${event.clientX - rect.left}px`);
-			card.style.setProperty('--my', `${event.clientY - rect.top}px`);
-		});
+			if (glowQueued) return;
+			glowQueued = true;
+			const { clientX, clientY } = event;
+			requestAnimationFrame(() => {
+				glowQueued = false;
+				const rect = card.getBoundingClientRect();
+				card.style.setProperty('--mx', `${clientX - rect.left}px`);
+				card.style.setProperty('--my', `${clientY - rect.top}px`);
+			});
+		}, { passive: true });
 	});
 
 	// Reveal below-the-fold blocks as they scroll into view (skipped when motion is reduced).

@@ -14,7 +14,7 @@
             </div>
             <div class="preview-shell" data-camera-panel>
                 <div class="preview-screen">
-                    <img class="preview-photo" src="https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=1100&q=85" alt="Learners practicing together in a welcoming classroom">
+                    <img class="preview-photo" src="https://images.unsplash.com/photo-1543269865-cbf427effbad?auto=format&fit=crop&w=900&q=70" width="900" height="640" fetchpriority="high" decoding="async" alt="Learners practicing together in a welcoming classroom">
                     <video class="camera-video" data-camera-video autoplay playsinline muted aria-label="Live camera preview"></video>
                     <span class="preview-label">Practice preview</span><span class="camera-indicator" aria-hidden="true"></span>
                     <div class="recognition-panel"><div><span class="micro-label">Your next step</span><strong>Start with hello</strong></div><button class="camera-start" type="button" data-camera-start>Try your camera</button></div>

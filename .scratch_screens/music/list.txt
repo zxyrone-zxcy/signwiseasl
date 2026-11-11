@@ -1,0 +1,4 @@
+file 'chord1.wav'
+file 'chord2.wav'
+file 'chord3.wav'
+file 'chord4.wav'
